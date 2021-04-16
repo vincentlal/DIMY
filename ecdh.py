@@ -5,7 +5,7 @@
 # 		Solution:
 # 			1. Use hash to determine if EphID was prepended with \x02 or \x03
 # 			2. Use only one type (e.g. only EphID starting with \x02)
-# 			3. Append 'b\x03' to EphID. Sign of Y does not seem to make a difference to EncID generated (Currently used)
+# 			3. Append 'b\x02' to EphID. Sign of Y does not seem to make a difference to EncID generated (Currently used)
 
 # Setup:
 # 	git clone https://github.com/tlsfuzzer/python-ecdsa.git
