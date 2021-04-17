@@ -1,11 +1,8 @@
 # Task 6 and 7
-# pip3 install simplebloomfilter
-from bloomfilter import BloomFilter
-from ecdh import generateECDHObjects, verifyEphID, calcEncID
+from bloomfilter import BloomFilter # pip3 install simplebloomfilter
 from datetime import datetime, timedelta
 import time
 import threading
-import sys
 
 class DBF():
     def __init__(self, startTime, endTime):
@@ -34,7 +31,6 @@ class DBFManager():
         # Create initial DBF objects
         self._dbfList = []
         self._processStarted = time.time()
-        self._terminated = False
         self._cycleRate = 600 # how many seconds 1 DBF is to be used for
         for i in range(0, 6):
             start = datetime.now() + timedelta(seconds=i*self._cycleRate)
@@ -44,14 +40,10 @@ class DBFManager():
         # Cycle DBFs every 10 minutes with no drift
         self._dbfThread = threading.Thread(target=self.initialiseDBFCycling, name='DBF-Cycler', daemon=True)
         self._dbfThread.start()
-        
-    def terminate(self):
-        self._terminated = True
     
     def initialiseDBFCycling(self):
         while True:
             time.sleep(self._cycleRate - ((time.time() - self._processStarted) % float(self._cycleRate)))
-            print("tick")
             self.cycleDBFs()
            
     def __repr__(self):
@@ -66,7 +58,7 @@ class DBFManager():
 
     # Add EncID to DBF
     def addToDBF(self, encID):
-        self._dbfList[-1].add(encID) # add to current DBF
+        self._dbfList[-1].add(encID) # add encID to current DBF
     
     def __contains__(self, encID):
         for dbf in self._dbfList:
