@@ -1,6 +1,5 @@
 from ecdh import generateECDHObjects, verifyEphID, calcEncID
 from DBF import DBFManager
-import sys
 
 if __name__ == '__main__':
     # First make some some ECDH objects

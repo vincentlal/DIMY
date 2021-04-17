@@ -1,4 +1,5 @@
 # Derived from https://github.com/dnanhkhoa/simple-bloom-filter/blob/master/bloomfilter/bloomfilter.py
+# Modified version of python package simple-bloom-filter to give us access to the underlying bitarray
 
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
