@@ -1,14 +1,15 @@
 # Task 6 and 7
-from bloomfilter import BloomFilter # pip3 install simplebloomfilter
+from CustomBloomFilter import CustomBloomFilter
 from datetime import datetime, timedelta
 import time
 import threading
+from QBF import QBF
 
 class DBF():
     def __init__(self, startTime, endTime):
         self._startTime = startTime
         self._endTime = endTime
-        self._dbf = BloomFilter(size=800000, fp_prob=0.0000062)
+        self._dbf = CustomBloomFilter(size=800000, fp_prob=0.0000062)
     
     def __contains__(self, encID):
         return encID in self._dbf
@@ -24,6 +25,10 @@ class DBF():
     
     def add(self, encID):
         self._dbf.add(encID)
+    
+    @property
+    def filter(self):
+        return self._dbf.filter
 
 class DBFManager():
     # Constructor
@@ -59,6 +64,9 @@ class DBFManager():
     # Add EncID to DBF
     def addToDBF(self, encID):
         self._dbfList[-1].add(encID) # add encID to current DBF
+    
+    def combineIntoQBF(self):
+        return QBF(self._dbfList)
     
     def __contains__(self, encID):
         for dbf in self._dbfList:
