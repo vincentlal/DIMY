@@ -9,7 +9,7 @@ class DBF():
     def __init__(self, startTime, endTime):
         self._startTime = startTime
         self._endTime = endTime
-        self._dbf = CustomBloomFilter(size=800000, fp_prob=0.0000062)
+        self._dbf = CustomBloomFilter(filter_size=800000, num_hashes=2)
     
     def __contains__(self, encID):
         return encID in self._dbf
@@ -17,10 +17,12 @@ class DBF():
     def __repr__(self):
         return f'DBF(startTime:{self._startTime}, endTime:{self._endTime}'
 
-    def getStartTime(self):
+    @property
+    def startTime(self):
         return self._startTime
-    
-    def getEndTime(self):
+
+    @property
+    def endTime(self):
         return self._endTime
     
     def add(self, encID):
@@ -55,7 +57,7 @@ class DBFManager():
         return str(self._dbfList)
     
     def cycleDBFs(self):
-        start = self._dbfList[-1].getEndTime()
+        start = self._dbfList[-1].endTime
         end = start + timedelta(seconds=self._cycleRate)
         self._dbfList.pop(0)
         self._dbfList.append(DBF(start,end))

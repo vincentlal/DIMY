@@ -9,21 +9,14 @@ import mmh3
 from bitarray import bitarray
 
 class CustomBloomFilter():
-    def __init__(self, size, fp_prob=1e-6):
+    def __init__(self, filter_size, num_hashes):
         self.__size_used = 0
-        self.__size = size
-        self.__fp_prob = fp_prob
 
-        if self.__size:
-            self.__filter_size = math.ceil(
-                -self.__size * math.log(self.__fp_prob) / math.log(2) ** 2
-            )
-            self.__num_hashes = round(self.__filter_size * math.log(2) / self.__size)
+        self.__filter_size = filter_size
+        self.__num_hashes = num_hashes
 
-            self.__filter = bitarray(self.__filter_size, endian="little")
-            self.__filter.setall(False)
-        else:
-            self.__filter = bitarray(endian="little")
+        self.__filter = bitarray(self.__filter_size, endian="little")
+        self.__filter.setall(False)
     
     @property
     def filter_size(self):
@@ -32,10 +25,6 @@ class CustomBloomFilter():
     @property
     def num_hashes(self):
         return self.__num_hashes
-
-    @property
-    def fp_prob(self):
-        return self.__fp_prob
 
     @property
     def size(self):
@@ -53,7 +42,7 @@ class CustomBloomFilter():
         return self.__size_used
 
     def add(self, item):
-        if item not in self and self.__size_used < self.__size:
+        if item not in self:
             for i in range(self.__num_hashes):
                 self.__filter[mmh3.hash(item, i) % self.__filter_size] = True
             self.__size_used += 1

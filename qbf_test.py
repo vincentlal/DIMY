@@ -2,6 +2,7 @@ from DBF import DBFManager
 from QBF import QBF
 from bitarray import bitarray
 from ecdh import generateECDHObjects, verifyEphID, calcEncID
+import json
 
 # Simplified example with small number of EncIDs
 
@@ -56,5 +57,17 @@ if __name__ == '__main__':
     qbf = dbfm.combineIntoQBF()
     for encID in encIDs:
         print(encID in qbf) # Should print true for all
+    b64_data = qbf.base64Representation()
+    b64_string = b64_data.decode('utf-8')
+    raw_data = {"QBF" : b64_string}
+    print(len(b64_string))
+    json_data = json.dumps(raw_data, indent=4)
+    with open('dump.json', 'w') as fp:
+        fp.write(json_data)
+
+    with open('dump_example.json', 'r') as fp2:
+        data = fp2.read()
+        print(len(data))
+        
 
 
