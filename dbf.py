@@ -1,47 +1,75 @@
-from ecdh import generateECDHObjects, verifyEphID, calcEncID
-
+# Task 6 and 7
 # pip3 install simplebloomfilter
 from bloomfilter import BloomFilter
+from ecdh import generateECDHObjects, verifyEphID, calcEncID
+from datetime import datetime, timedelta
+import time
+import threading
+import sys
 
-# Task 6: Storing constructed EncID into Daily Bloom Filter DBF and delete the EncID
-
-if __name__ == '__main__':
-    # First make some some ECDH objects
-    alice, aliceEphID, aliceHash = generateECDHObjects()
-    bob, bobEphID, bobHash = generateECDHObjects()
-    charlie, charlieEphID, charlieHash = generateECDHObjects()
-    david, davidEphID, davidHash = generateECDHObjects()
-    erin, erinEphID, erinHash = generateECDHObjects()
-    frank, frankEphID, frankHash = generateECDHObjects()
-
-    assert(verifyEphID(aliceEphID, aliceHash))
-    assert (verifyEphID(bobEphID, bobHash))
-    assert (verifyEphID(charlieEphID, charlieHash))
-    assert (verifyEphID(davidEphID, davidHash))
-    assert (verifyEphID(erinEphID, erinHash))
-    assert (verifyEphID(frankEphID, frankHash))
-
-    AB_EncId = calcEncID(alice, bobEphID)
-    AC_EncId = calcEncID(alice, charlieEphID)
-    AD_EncId = calcEncID(alice, davidEphID);
-    AE_EncId = calcEncID(alice, erinEphID);
-    AF_EncId = calcEncID(alice, frankEphID);
-
-    # List of encIDs that have been stored
-    # Once connected to dimy.py this will store all EncIDs collected within 10 minutes
-    # But for now we will just use 3 of the 5randomly generated EncIDs for testing
-    encIDs = [AB_EncId, AC_EncId, AD_EncId]
-
-    # Create bloom filter (parameters set as per paper, however unable to set number of hashes)
-    # Our implementation uses 17 hashes instead of 2 as described in the paper given the same false positive rate
-    DBF = BloomFilter(size=800000, fp_prob=0.0000062)
-    for encID in encIDs:
-        DBF.add(encID)
+class DBF():
+    def __init__(self, startTime, endTime):
+        self._startTime = startTime
+        self._endTime = endTime
+        self._dbf = BloomFilter(size=800000, fp_prob=0.0000062)
     
-    print(AB_EncId in DBF)
-    print(AC_EncId in DBF)
-    print(AD_EncId in DBF)
-    print(AE_EncId in DBF) # not in DBF
-    print(AF_EncId in DBF) # not in DBF
+    def __contains__(self, encID):
+        return encID in self._dbf
     
+    def __repr__(self):
+        return f'DBF(startTime:{self._startTime}, endTime:{self._endTime}'
 
+    def getStartTime(self):
+        return self._startTime
+    
+    def getEndTime(self):
+        return self._endTime
+    
+    def add(self, encID):
+        self._dbf.add(encID)
+
+class DBFManager():
+    # Constructor
+    def __init__(self):
+        # Create initial DBF objects
+        self._dbfList = []
+        self._processStarted = time.time()
+        self._terminated = False
+        self._cycleRate = 600 # how many seconds 1 DBF is to be used for
+        for i in range(0, 6):
+            start = datetime.now() + timedelta(seconds=i*self._cycleRate)
+            end = datetime.now() + timedelta(seconds=(i+1)*self._cycleRate)
+            dbfObj = DBF(start, end)
+            self._dbfList.append(dbfObj)
+        # Cycle DBFs every 10 minutes with no drift
+        self._dbfThread = threading.Thread(target=self.initialiseDBFCycling, name='DBF-Cycler', daemon=True)
+        self._dbfThread.start()
+        
+    def terminate(self):
+        self._terminated = True
+    
+    def initialiseDBFCycling(self):
+        while True:
+            time.sleep(self._cycleRate - ((time.time() - self._processStarted) % float(self._cycleRate)))
+            print("tick")
+            self.cycleDBFs()
+           
+    def __repr__(self):
+        return str(self._dbfList)
+    
+    def cycleDBFs(self):
+        start = self._dbfList[-1].getEndTime()
+        end = start + timedelta(seconds=self._cycleRate)
+        self._dbfList.pop(0)
+        self._dbfList.append(DBF(start,end))
+        print(self)
+
+    # Add EncID to DBF
+    def addToDBF(self, encID):
+        self._dbfList[-1].add(encID) # add to current DBF
+    
+    def __contains__(self, encID):
+        for dbf in self._dbfList:
+            if (encID in dbf):
+                return True
+        return False
