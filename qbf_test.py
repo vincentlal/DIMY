@@ -64,10 +64,8 @@ if __name__ == '__main__':
     json_data = json.dumps(raw_data, indent=4)
     with open('dump.json', 'w') as fp:
         fp.write(json_data)
-
-    with open('dump_example.json', 'r') as fp2:
-        data = fp2.read()
-        print(len(data))
+    dbfm.sendQBFToEC2Backend(json_data)
+    
         
 
 
