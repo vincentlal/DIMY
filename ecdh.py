@@ -24,7 +24,7 @@ def generateECDHObjects ():
 	return (
 		ecdh,
 		publicKey,
-		md5(publicKey).hexdigest()[:6]
+		# md5(publicKey).hexdigest()[:6]
 	)
 
 # Verify reconstructed EphID matches first 6 bytes of EphID hash from packet
@@ -34,24 +34,26 @@ def verifyEphID (EphID, receivedHash):
 # Append with b'\x02' since required and it does not affect EncID generation
 def calcEncID (ECDH, receivedEphID):
 	ECDH.load_received_public_key_bytes(b'\x02' + receivedEphID)
-	return ECDH.generate_sharedsecret_bytes().hex()
+	return ECDH.generate_sharedsecret_bytes()
 
 def EphIDTest ():
-	alice, aliceEphID, aliceHash = generateECDHObjects()
-	bob, bobEphID, bobHash = generateECDHObjects()
+	alice, aliceEphID = generateECDHObjects()
+	bob, bobEphID = generateECDHObjects()
 
-	assert (verifyEphID(aliceEphID, aliceHash))
-	assert (verifyEphID(bobEphID, bobHash))
+	# print(type(aliceEphID))
+	# assert (verifyEphID(aliceEphID, aliceHash))
+	# assert (verifyEphID(bobEphID, bobHash))
 
 	aliceEncID = calcEncID(alice, bobEphID)
 	bobEncID = calcEncID(bob, aliceEphID)
 
-	print(aliceEncID)
-	print(bobEncID)
+	print(aliceEncID.hex())
+	print(bobEncID.hex())
 
 	if (aliceEncID == bobEncID):
-		print(f"Success: Generated EncID: {aliceEncID}")
+		print(f"Success: Generated EncID: {aliceEncID.hex()}")
 	else:
 		print("EncIDs not matching")
 
-EphIDTest()
+if __name__ == "__main__":
+	EphIDTest()
