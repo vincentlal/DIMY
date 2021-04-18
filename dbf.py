@@ -4,6 +4,7 @@ from datetime import datetime, timedelta
 import time
 import threading
 from QBF import QBF
+from CBF import CBF
 import http.client
 
 class DBF():
@@ -71,6 +72,9 @@ class DBFManager():
     def combineIntoQBF(self):
         return QBF(self._dbfList)
     
+    def combineIntoCBF(self):
+        return CBF(self._dbfList)
+    
     def sendQBFToEC2Backend(self, QBFJson):
         conn = http.client.HTTPConnection("ec2-3-26-37-172.ap-southeast-2.compute.amazonaws.com:9000")
         payload = str(QBFJson)
@@ -79,6 +83,10 @@ class DBFManager():
         res = conn.getresponse()
         data = res.read()
         print(data.decode("utf-8"))
+
+    def uploadCBF(self, CBFJson):
+        pass
+
 
     
     def __contains__(self, encID):
