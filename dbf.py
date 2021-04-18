@@ -42,20 +42,21 @@ class DBF():
 class DBFManager():
     # Constructor
     def __init__(self):
-        # Create initial DBF object
         self._dbfList = []
         self._qbf = None
         self._processStarted = time.time()
         self._cycles = 0
         self._cycleRate = 600 # how many seconds 1 DBF is to be used for
+        # Create initial DBF object
         start = datetime.now()
         end = datetime.now() + timedelta(seconds=self._cycleRate)
         dbfObj = DBF(start, end)
         self._dbfList.append(dbfObj)
-        # Cycle DBFs every 10 minutes with no drift
+        # Start thready for cycling DBFs
         self._dbfThread = threading.Thread(target=self.initialiseDBFCycling, name='DBF-Cycler', daemon=True)
         self._dbfThread.start()
 
+    # Cycle DBFs every 10 minutes with no drift
     def initialiseDBFCycling(self):
         while True:
             time.sleep(self._cycleRate - ((time.time() - self._processStarted) % float(self._cycleRate)))
@@ -75,7 +76,6 @@ class DBFManager():
             self._cycles = 0           
             self.setQBF()
         
-
     # Add EncID to DBF
     def addToDBF(self, encID):
         print("Inserting into DBF (murmur3 hashing with 3 hashes)")
