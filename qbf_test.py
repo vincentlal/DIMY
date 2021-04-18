@@ -8,13 +8,13 @@ import json
 
 if __name__ == '__main__':
     # First make some some ECDH objects
-    alice, aliceEphID = generateECDHObjects()
-    bob, bobEphID = generateECDHObjects()
-    charlie, charlieEphID = generateECDHObjects()
-    david, davidEphID = generateECDHObjects()
-    erin, erinEphID = generateECDHObjects()
-    frank, frankEphID = generateECDHObjects()
-    graham, grahamEphID = generateECDHObjects()
+    alice, aliceEphID, _ = generateECDHObjects()
+    bob, bobEphID, _ = generateECDHObjects()
+    charlie, charlieEphID, _ = generateECDHObjects()
+    david, davidEphID, _ = generateECDHObjects()
+    erin, erinEphID, _ = generateECDHObjects()
+    frank, frankEphID, _ = generateECDHObjects()
+    graham, grahamEphID, _ = generateECDHObjects()
 
     AB_EncId = calcEncID(alice, bobEphID)
     AC_EncId = calcEncID(alice, charlieEphID)
