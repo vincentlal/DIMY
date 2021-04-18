@@ -75,7 +75,8 @@ class DBFManager():
     def combineIntoCBF(self):
         return CBF(self._dbfList)
     
-    def sendQBFToEC2Backend(self, QBFJson):
+    def sendQBFToEC2Backend(self):
+        QBFJson = self.combineIntoQBF().jsonStringRepresentation()
         conn = http.client.HTTPConnection("ec2-3-26-37-172.ap-southeast-2.compute.amazonaws.com:9000")
         payload = str(QBFJson)
         headers = { 'Content-Type': "application/json" }
@@ -84,8 +85,16 @@ class DBFManager():
         data = res.read()
         print(data.decode("utf-8"))
 
-    def uploadCBF(self, CBFJson):
-        pass
+    def uploadCBF(self):
+        CBFJson = self.combineIntoCBF().jsonStringRepresentation()
+        conn = http.client.HTTPConnection("ec2-3-26-37-172.ap-southeast-2.compute.amazonaws.com:9000")
+        payload = str(CBFJson)
+        headers = { 'Content-Type': "application/json" }
+        conn.request("POST", "/comp4337/cbf/upload", payload, headers)
+        res = conn.getresponse()
+        data = res.read()
+        print(data.decode('utf-8'))
+        
 
 
     
