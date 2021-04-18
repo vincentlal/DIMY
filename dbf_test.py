@@ -33,7 +33,10 @@ if __name__ == '__main__':
     dbfm.addToDBF(AB_EncId)
     dbfm.cycleDBFs()
     dbfm.addToDBF(AC_EncId)
+    #positive test
     dbfm.uploadCBF()
+    dbfm.sendQBFToEC2Backend()
+    
     
     # # Check false positives
     # fpCount = 0
