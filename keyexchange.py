@@ -23,8 +23,7 @@ class KeyHandler:
         
         # Key generate part
         
-        self.round = 0
-        self.ecdhObj, self.publicKey = ecdh.generateECDHObjects()
+        self.ecdhObj, self.publicKey, self.round= ecdh.generateECDHObjects()
         self.shares = Shamir.split(3, 6, self.publicKey)
         
         # Key reconstruct part
@@ -49,7 +48,7 @@ class KeyHandler:
 
     def genEphID(self):
         with self.lock:
-            self.ecdhObj, self.publicKey = ecdh.generateECDHObjects()
+            self.ecdhObj, self.publicKey, self.round = ecdh.generateECDHObjects()
             self.shares = Shamir.split(3, 6, self.publicKey)
             self.round += 1
     
@@ -92,7 +91,9 @@ class KeyHandler:
                     shares.append((int(idx), unhexlify(share)))
                 
                 peer_ephid = Shamir.combine(shares)
-                print("Recovered EphID: " + peer_ephid.hex())
+                if ecdh.verifyEphID(peer_ephid, peer_round):
+                    print(addr + "'s EphID verified")
+                    print("Recovered EphID: " + peer_ephid.hex())
                 
                 encid = ecdh.calcEncID(self.ecdhObj, peer_ephid)
                 print("Generate EncID: " + encid.hex())

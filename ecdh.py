@@ -24,7 +24,7 @@ def generateECDHObjects ():
 	return (
 		ecdh,
 		publicKey,
-		# md5(publicKey).hexdigest()[:6]
+		md5(publicKey).hexdigest()[:6]
 	)
 
 # Verify reconstructed EphID matches first 6 bytes of EphID hash from packet
@@ -37,15 +37,18 @@ def calcEncID (ECDH, receivedEphID):
 	return ECDH.generate_sharedsecret_bytes()
 
 def EphIDTest ():
-	alice, aliceEphID = generateECDHObjects()
-	bob, bobEphID = generateECDHObjects()
+	alice, aliceEphID, aliceHash = generateECDHObjects()
+	bob, bobEphID, bobHash = generateECDHObjects()
 
-	# print(type(aliceEphID))
+	# print(type(aliceHash))
 	# assert (verifyEphID(aliceEphID, aliceHash))
 	# assert (verifyEphID(bobEphID, bobHash))
 
 	aliceEncID = calcEncID(alice, bobEphID)
 	bobEncID = calcEncID(bob, aliceEphID)
+
+	assert (verifyEphID(aliceEphID, aliceHash))
+	assert (verifyEphID(bobEphID, bobHash))
 
 	print(aliceEncID.hex())
 	print(bobEncID.hex())
