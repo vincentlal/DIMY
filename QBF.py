@@ -3,9 +3,9 @@ import base64
 import json
 class QBF():
     def __init__(self, DBFList):
-        self._QBF = CustomBloomFilter(filter_size=800000, num_hashes=2)
+        self._QBF = CustomBloomFilter(filter_size=800000, num_hashes=3)
         combinedBitArray = DBFList[0].filter
-        for i in range(1, 6):
+        for i in range(1, len(DBFList)):
             combinedBitArray |= DBFList[i].filter
         self._QBF.filter = combinedBitArray
     
@@ -18,5 +18,8 @@ class QBF():
     def base64Representation(self):
         return base64.b64encode(self._QBF.filter)
     
+    def rawJSON(self):
+        return {"QBF" : base64.b64encode(self._QBF.filter).decode('utf-8')}
+        
     def jsonStringRepresentation(self):
         return json.dumps({"QBF" : base64.b64encode(self._QBF.filter).decode('utf-8')}, indent=4)

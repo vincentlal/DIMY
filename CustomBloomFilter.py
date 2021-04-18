@@ -5,9 +5,7 @@
 
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-import math
 import mmh3
-
 from bitarray import bitarray
 
 class CustomBloomFilter():
@@ -19,6 +17,9 @@ class CustomBloomFilter():
 
         self.__filter = bitarray(self.__filter_size, endian="little")
         self.__filter.setall(False)
+    
+    # def __repr__(self):
+    #     return None
     
     @property
     def filter_size(self):

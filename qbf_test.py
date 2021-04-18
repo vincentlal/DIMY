@@ -23,14 +23,6 @@ if __name__ == '__main__':
     AF_EncId = calcEncID(alice, frankEphID)
     AG_EncId = calcEncID(alice, grahamEphID)
 
-    # Generate a bunch of random EphIDs and EncIds so we can do false positive checking
-    # falseEncounters = []
-    # for i in range (0, 1000):
-    #     print(f'Generating false encounter {i}')
-    #     _, randEphID = generateECDHObjects()
-    #     falseEncounter = calcEncID(alice, randEphID)
-    #     falseEncounters.append(falseEncounter)
-
     encIDs = [AB_EncId, AC_EncId, AD_EncId, AE_EncId, AF_EncId, AG_EncId]
     dbfm = DBFManager()
     # Manually add one EncID to each of the bloom filters for testing combining
@@ -45,11 +37,8 @@ if __name__ == '__main__':
     dbfm.addToDBF(AF_EncId)
     dbfm.cycleDBFs()
     dbfm.addToDBF(AG_EncId)
-    for encID in encIDs:
-        print(encID in dbfm) # Should print true for all
+    
     dbfm.sendQBFToEC2Backend()
-    # with open('dump2.json', 'w') as fp:
-    #     fp.write(dbfm.combineIntoQBF())
     dbfm.uploadCBF()
     
     

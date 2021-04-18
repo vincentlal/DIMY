@@ -5,13 +5,13 @@ import time
 import threading
 from QBF import QBF
 from CBF import CBF
-import http.client
+import requests
 
 class DBF():
     def __init__(self, startTime, endTime):
         self._startTime = startTime
         self._endTime = endTime
-        self._dbf = CustomBloomFilter(filter_size=800000, num_hashes=2)
+        self._dbf = CustomBloomFilter(filter_size=800000, num_hashes=3)
     
     def __contains__(self, encID):
         return encID in self._dbf
@@ -29,7 +29,7 @@ class DBF():
     
     def add(self, encID):
         self._dbf.add(encID)
-    
+
     @property
     def filter(self):
         return self._dbf.filter
@@ -37,67 +37,68 @@ class DBF():
 class DBFManager():
     # Constructor
     def __init__(self):
-        # Create initial DBF objects
+        # Create initial DBF object
         self._dbfList = []
         self._processStarted = time.time()
         self._cycleRate = 600 # how many seconds 1 DBF is to be used for
-        for i in range(0, 6):
-            start = datetime.now() + timedelta(seconds=i*self._cycleRate)
-            end = datetime.now() + timedelta(seconds=(i+1)*self._cycleRate)
-            dbfObj = DBF(start, end)
-            self._dbfList.append(dbfObj)
+        start = datetime.now()
+        end = datetime.now() + timedelta(seconds=self._cycleRate)
+        dbfObj = DBF(start, end)
+        self._dbfList.append(dbfObj)
         # Cycle DBFs every 10 minutes with no drift
         self._dbfThread = threading.Thread(target=self.initialiseDBFCycling, name='DBF-Cycler', daemon=True)
         self._dbfThread.start()
-    
+
     def initialiseDBFCycling(self):
         while True:
+            print(self._cycleRate - ((time.time() - self._processStarted) % float(self._cycleRate)))
             time.sleep(self._cycleRate - ((time.time() - self._processStarted) % float(self._cycleRate)))
             self.cycleDBFs()
-           
+
     def __repr__(self):
         return str(self._dbfList)
-    
+
     def cycleDBFs(self):
         start = self._dbfList[-1].endTime
         end = start + timedelta(seconds=self._cycleRate)
-        self._dbfList.pop(0)
+        if (len(self._dbfList) == 6):
+            self._dbfList.pop(0)
         self._dbfList.append(DBF(start,end))
         print(self)
 
     # Add EncID to DBF
     def addToDBF(self, encID):
         self._dbfList[-1].add(encID) # add encID to current DBF
-    
+
     def combineIntoQBF(self):
         return QBF(self._dbfList)
-    
+
     def combineIntoCBF(self):
         return CBF(self._dbfList)
-    
+
     def sendQBFToEC2Backend(self):
-        QBFJson = self.combineIntoQBF().jsonStringRepresentation()
-        conn = http.client.HTTPConnection("ec2-3-26-37-172.ap-southeast-2.compute.amazonaws.com:9000")
-        payload = str(QBFJson)
-        headers = { 'Content-Type': "application/json" }
-        conn.request("POST", "/comp4337/qbf/query", payload, headers)
-        res = conn.getresponse()
-        data = res.read()
-        print(data.decode("utf-8"))
+        url = "http://ec2-3-26-37-172.ap-southeast-2.compute.amazonaws.com:9000/comp4337/qbf/query"
+        payload = self.combineIntoQBF().rawJSON()
+        headers = {"Content-Type": "application/json"}
+        res = requests.request("POST", url, json=payload, headers=headers)
+        resJSON = res.json()
+        if (resJSON['result'] == "No Match"):
+            print("QBF Uploaded to EC2 Server - No Match - You are safe.")
+        else:
+            print("QBF Uploaded to EC2 Server - Match - You are potentially at risk. Please consult a health official, self-isolate and do a COVID-19 test at your earliest convenience.")
 
     def uploadCBF(self):
-        CBFJson = self.combineIntoCBF().jsonStringRepresentation()
-        conn = http.client.HTTPConnection("ec2-3-26-37-172.ap-southeast-2.compute.amazonaws.com:9000")
-        payload = str(CBFJson)
-        headers = { 'Content-Type': "application/json" }
-        conn.request("POST", "/comp4337/cbf/upload", payload, headers)
-        res = conn.getresponse()
-        data = res.read()
-        print(data.decode('utf-8'))
-        
+        url = "http://ec2-3-26-37-172.ap-southeast-2.compute.amazonaws.com:9000/comp4337/cbf/upload"
+        payload = self.combineIntoCBF().rawJSON()
+        headers = {"Content-Type": "application/json"}
+        res = requests.request("POST", url, json=payload, headers=headers)
+        resJSON = res.json()
+        print(resJSON)
+        if (resJSON['result'] == "Success"):
+            print("CBF successfully uploaded to EC2 Server")
+        else:
+            print("Failed to upload CBF - rejected by EC2 Server")
 
-
-    
     def __contains__(self, encID):
         for dbf in self._dbfList:
             if (encID in dbf):
