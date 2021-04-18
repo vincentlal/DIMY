@@ -1,6 +1,7 @@
 from flask import Flask, request, jsonify
 import base64
 from bitarray import bitarray
+from datetime import datetime
 
 flask_app = Flask(__name__)
 flask_app.config["SECRET_KEY"] = '%*sW$Vt9OZ$D%eQEY<$7cW.W07MkZAsCCF^l(Y0`5h0ZW#[v;vf0j*.c=:~e}n4'
@@ -42,7 +43,7 @@ def qbf_query():
         QBFBitArray = bitarray(decodedQBF)
     except Exception:
         return jsonify({
-            "timestamp": "2021-03-22T02:10:13.257+00:00",
+            "timestamp": f"{datetime.now()}",
             "status": 400,
             "error": "Bad Request",
             "message": "",
