@@ -31,7 +31,9 @@ if __name__ == '__main__':
 
     dbfm = DBFManager()
     dbfm.addToDBF(AB_EncId)
-    print(dbfm._dbfList[-1]._dbf.getIndexes())
+    dbfm.cycleDBFs()
+    dbfm.addToDBF(AC_EncId)
+    dbfm.uploadCBF()
     
     # # Check false positives
     # fpCount = 0

@@ -21,7 +21,7 @@ class CustomBloomFilter():
     def getIndexes(self):
         s = self.__filter.to01()
         indexes = [str(i) for i in range(0, len(s)) if s[i] == '1']
-        return '{' + ','.join(indexes) + '}'
+        return '{' + ', '.join(indexes) + '}'
     
     @property
     def filter_size(self):
