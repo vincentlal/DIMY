@@ -1,5 +1,7 @@
 # Derived from https://github.com/dnanhkhoa/simple-bloom-filter/blob/master/bloomfilter/bloomfilter.py
-# Modified version of python package simple-bloom-filter to give us access to the underlying bitarray
+# Modified version of python package simple-bloom-filter
+# to give us access to the underlying bitarray and also 
+# allow us to set filter size and number of hashes directly
 
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
