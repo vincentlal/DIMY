@@ -23,7 +23,13 @@ def cbf_upload():
         decodedCBF = base64.b64decode(CBF)
         CBFBitArray = bitarray(decodedCBF)
     except Exception:
-        return jsonify({'error' : 'Unable to decode CBF', 'result' : 'Failed', 'message' : 'please check your CBF'}), 200
+        return jsonify({
+            "timestamp": f"{datetime.now()}",
+            "status": 400,
+            "error": "Bad Request",
+            "message": "",
+            "path": "/comp4337/cbf/upload"
+        }), 400
     uploaded_cbfs.append(CBFBitArray)
     return jsonify({'result' : 'Success', 'message' : 'upload CBF success'}), 200
 
@@ -47,7 +53,7 @@ def qbf_query():
             "status": 400,
             "error": "Bad Request",
             "message": "",
-            "path": "/comp4337/cbf/upload"
+            "path": "/comp4337/qbf/query"
         }), 400
     for cbf in uploaded_cbfs:
         bitwise_AND = cbf & QBFBitArray
