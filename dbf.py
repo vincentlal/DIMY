@@ -28,7 +28,8 @@ class DBF():
         return self._endTime
     
     def add(self, encID):
-        self._dbf.add(encID)
+        indexes = self._dbf.add(encID)
+        print(indexes)
 
     @property
     def filter(self):
@@ -51,7 +52,6 @@ class DBFManager():
 
     def initialiseDBFCycling(self):
         while True:
-            print(self._cycleRate - ((time.time() - self._processStarted) % float(self._cycleRate)))
             time.sleep(self._cycleRate - ((time.time() - self._processStarted) % float(self._cycleRate)))
             self.cycleDBFs()
 

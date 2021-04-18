@@ -18,8 +18,10 @@ class CustomBloomFilter():
         self.__filter = bitarray(self.__filter_size, endian="little")
         self.__filter.setall(False)
     
-    # def __repr__(self):
-    #     return None
+    def getIndexes(self):
+        s = self.__filter.to01()
+        indexes = [str(i) for i in range(0, len(s)) if s[i] == '1']
+        return '{' + ','.join(indexes) + '}'
     
     @property
     def filter_size(self):
@@ -45,10 +47,13 @@ class CustomBloomFilter():
         return self.__size_used
 
     def add(self, item):
+        indexes = []
         if item not in self:
             for i in range(self.__num_hashes):
                 self.__filter[mmh3.hash(item, i) % self.__filter_size] = True
+                indexes.append(mmh3.hash(item, i) % self.__filter_size)
             self.__size_used += 1
+        return indexes
 
     def __contains__(self, item):
         for i in range(self.__num_hashes):
