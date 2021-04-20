@@ -26,6 +26,13 @@ class KeyHandler:
         self.ecdhObj, self.publicKey, self.round= ecdh.generateECDHObjects()
         self.shares = Shamir.split(3, 6, self.publicKey)
         
+        # task 1 & 2
+        print("#############################################################")
+        print("Generate EphID: " + self.publicKey.hex())
+        for idx, share in self.shares:
+            print("Generate share " + str(idx) + " of EphID: " + hexlify(share).decode())
+        print("#############################################################")
+
         # Key reconstruct part
         
         ## nested dict to store shares of EphID from others
@@ -43,14 +50,20 @@ class KeyHandler:
     def getShareOfEphID(self, count):
         with self.lock:
             idx, share = self.shares[count]
-            # print("Share " + str(idx) + " of EphID: " + hexlify(share).decode())
+            print("Sending share " + str(idx) + " of EphID: " + hexlify(share).decode())
             return (self.round, idx, hexlify(share))
 
     def genEphID(self):
         with self.lock:
             self.ecdhObj, self.publicKey, self.round = ecdh.generateECDHObjects()
             self.shares = Shamir.split(3, 6, self.publicKey)
-            self.round += 1
+
+            # task 1 & 2
+            print("#############################################################")
+            print("Generate EphID: " + self.publicKey.hex())
+            for idx, share in self.shares:
+                print("Generate share " + str(idx) + " of EphID: " + hexlify(share).decode())
+            print("#############################################################")
     
     # return EncID if enough shares are received; otherwise return None
     def addPeerShare(self, addr, data):

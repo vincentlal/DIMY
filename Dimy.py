@@ -2,8 +2,9 @@ import sys
 import socket
 import threading
 import time
+import keyexchange
   
-def send():
+def send(khandler):
     sender = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP) # UDP
 
     # Enable port reusage so we will be able to run multiple clients and servers on single (host, port). 
@@ -22,18 +23,18 @@ def send():
     while True:
         if minuteFlag == 6:
             # TODO: ECDH
-            print("EphID generated")
+            khandler.genEphID()
             minuteFlag = 0
        
         # TODO: Shamir Secret Sharing
-        message = b"share of EphID"
+        share_in_tuple = khandler.getShareOfEphID(minuteFlag)
+        message = keyexchange.shareOfEphIDToBytes(share_in_tuple)
         sender.sendto(message, ('<broadcast>', 12345))
-        print("share of EphID sent")
         
         time.sleep(10)
         minuteFlag += 1
   
-def receive():
+def receive(khandler):
     receiver = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP) # UDP
 
     # Enable port reusage so we will be able to run multiple clients and servers on single (host, port). 
@@ -57,9 +58,11 @@ def receive():
             print("received message: {} from {}".format(data, addr))
   
 if __name__ == "__main__":
+    khandler = keyexchange.KeyHandler()
+    
     # creating thread
-    t1 = threading.Thread(target=send, name='Thread-send', daemon=True)
-    t2 = threading.Thread(target=receive, name='Thread-receive', daemon=True)
+    t1 = threading.Thread(target=send, args=(khandler,), name='Thread-send', daemon=True)
+    t2 = threading.Thread(target=receive, args=(khandler,), name='Thread-receive', daemon=True)
 
     # starting thread 1
     t1.start()
