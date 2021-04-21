@@ -7,6 +7,10 @@ class CBF(QBF):
         super().__init__(DBFList)
 
     # Override
+    def printState(self):
+        print(f'Combined into single CBF with state: {self._QBF.getIndexes()}')
+
+    # Override
     def rawJSON(self):
         return {"CBF" : base64.b64encode(self._QBF.filter).decode('utf-8')}
 

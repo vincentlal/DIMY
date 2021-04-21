@@ -11,8 +11,11 @@ class QBF():
         for i in range(1, len(DBFList)):
             combinedBitArray |= DBFList[i].filter
         self._QBF.filter = combinedBitArray
-        print(f'Combined into single QBF with state: {self._QBF.getIndexes()}')
+        self.printState()
     
+    def printState(self):
+        print(f'Combined into single QBF with state: {self._QBF.getIndexes()}')
+
     def __repr__(self):
         return str(self._QBF.filter)
     

@@ -54,7 +54,7 @@ class DBFManager():
         self._dbfList.append(dbfObj)
         
         print("#############################################################")
-        print("Create new DBF(" + start.strftime("%Y-%m-%d %H:%M:%S") + ", " + end.strftime("%Y-%m-%d %H:%M:%S") + ")")
+        print("Create DBF(" + start.strftime("%Y-%m-%d %H:%M:%S") + ", " + end.strftime("%Y-%m-%d %H:%M:%S") + ")")
         
         # Start thready for cycling DBFs
         self._dbfThread = threading.Thread(target=self.initialiseDBFCycling, name='DBF-Cycler', daemon=True)
@@ -83,9 +83,13 @@ class DBFManager():
         if (self._cycles == 6):
             self._cycles = 0           
             self.setQBF()
+            self.sendQBFToEC2Backend()
         
     # Add EncID to DBF
     def addToDBF(self, encID):
+        if (self._cycles == 7):
+            return
+
         dbfObj = self._dbfList[-1]
         start = dbfObj.startTime
         end = dbfObj.endTime
@@ -109,7 +113,7 @@ class DBFManager():
 
     def sendQBFToEC2Backend(self):
         if (self._qbf == None):
-            print('here')
+            # print('here')
             self.setQBF()
         print("#############################################################")
         print('Uploading QBF to backend server...')
@@ -118,18 +122,22 @@ class DBFManager():
         headers = {"Content-Type": "application/json"}
         res = requests.request("POST", url, json=payload, headers=headers)
         resJSON = res.json()
+        print("#############################################################")
         if (resJSON['result'] == "No Match"):
             print("QBF Uploaded to EC2 Server - Result: No Match - You are safe.")
         else:
-            print("QBF Uploaded to EC2 Server - Result: Match - You are potentially at risk. Please consult a health official, self-isolate and do a COVID-19 test at your earliest convenience.")
+            print("QBF Uploaded to EC2 Server - Result: Match - You are potentially at risk.")
+            print("Please consult a health official, self-isolate and do a COVID-19 test at your earliest convenience.")
 
     def uploadCBF(self): 
+        print("#############################################################")
         url = "http://ec2-3-26-37-172.ap-southeast-2.compute.amazonaws.com:9000/comp4337/cbf/upload"
         payload = self.combineIntoCBF().rawJSON()
         headers = {"Content-Type": "application/json"}
         print('Uploading CBF to backend server...')
         res = requests.request("POST", url, json=payload, headers=headers)
         resJSON = res.json()
+        print("#############################################################")
         if (resJSON['result'] == "Success"):
             print("CBF successfully uploaded to EC2 Server")
             self._cycles = 7 # Setting this to > 6 will disable QBF generation

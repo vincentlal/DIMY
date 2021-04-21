@@ -81,6 +81,13 @@ if __name__ == "__main__":
   
     try:
         while True:
-            time.sleep(1)
+            try:
+                c = sys.stdin.read(1)
+                if str(c) == 's':
+                    dbfm.uploadCBF()
+                if str(c) == 'q':
+                    dbfm.sendQBFToEC2Backend()
+            except IOError: 
+                pass
     except KeyboardInterrupt:
         sys.exit()
