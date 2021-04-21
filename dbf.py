@@ -117,7 +117,10 @@ class DBFManager():
             self.setQBF()
         print("#############################################################")
         print('Uploading QBF to backend server...')
-        url = "http://ec2-3-26-37-172.ap-southeast-2.compute.amazonaws.com:9000/comp4337/qbf/query"
+        
+        # url = "http://ec2-3-26-37-172.ap-southeast-2.compute.amazonaws.com:9000/comp4337/qbf/query"
+        url = "http://localhost:55000/comp4337/qbf/query"
+        
         payload = self._qbf.rawJSON()
         headers = {"Content-Type": "application/json"}
         res = requests.request("POST", url, json=payload, headers=headers)
@@ -131,7 +134,10 @@ class DBFManager():
 
     def uploadCBF(self): 
         print("#############################################################")
-        url = "http://ec2-3-26-37-172.ap-southeast-2.compute.amazonaws.com:9000/comp4337/cbf/upload"
+        
+        # url = "http://ec2-3-26-37-172.ap-southeast-2.compute.amazonaws.com:9000/comp4337/cbf/upload"
+        url = "http://localhost:55000/comp4337/cbf/upload"
+        
         payload = self.combineIntoCBF().rawJSON()
         headers = {"Content-Type": "application/json"}
         print('Uploading CBF to backend server...')
