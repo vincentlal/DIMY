@@ -31,7 +31,6 @@ class KeyHandler:
         print("Generate EphID: " + self.publicKey.hex())
         for idx, share in self.shares:
             print("Generate share " + str(idx) + " of EphID: " + hexlify(share).decode())
-        print("#############################################################")
 
         # Key reconstruct part
         
@@ -43,6 +42,10 @@ class KeyHandler:
         ## e.g. {'192.168.1.1': {'round': '1', 'status': 'accept'}}
         self.peerRound = {}
     
+    def getEphIDHash(self):
+        with self.lock:
+            return self.round
+
     def printEphID(self):
         with self.lock:
             print("Generated EphID: " + self.publicKey.hex())    
@@ -50,7 +53,8 @@ class KeyHandler:
     def getShareOfEphID(self, count):
         with self.lock:
             idx, share = self.shares[count]
-            print("Sending share " + str(idx) + " of EphID: " + hexlify(share).decode())
+            print("#############################################################")
+            print("Broadcast share " + str(idx) + ": " + hexlify(share).decode())
             return (self.round, idx, hexlify(share))
 
     def genEphID(self):
@@ -63,7 +67,6 @@ class KeyHandler:
             print("Generate EphID: " + self.publicKey.hex())
             for idx, share in self.shares:
                 print("Generate share " + str(idx) + " of EphID: " + hexlify(share).decode())
-            print("#############################################################")
     
     # return EncID if enough shares are received; otherwise return None
     def addPeerShare(self, addr, data):
@@ -81,32 +84,60 @@ class KeyHandler:
                 self.peerRound[addr] = {}
                 self.peerRound[addr]['round'] = peer_round
                 self.peerRound[addr]['status'] = 'accept'
-                
+
+                # print result
+                print("#############################################################")
+                print("Receive share " + idx + ": " + share)
+                print("MD5: " + peer_round)
+                print("from: " + addr)
+                print("total: " + str(len(self.peerShares[addr])))
                 return None
             else:
                 # check if receiving-share and stored-shares are from same EphID
                 if peer_round == self.peerRound[addr]['round']:
-                    if self.peerRound[addr]['status'] == 'accept':
-                        self.peerShares[addr][idx] = share
-                    else:
-                        return None
+                    # insert
+                    self.peerShares[addr][idx] = share
+
+                    # print result
+                    print("#############################################################")
+                    print("Receive share " + idx + ": " + share)
+                    print("MD5: " + peer_round)
+                    print("from: " + addr)
+                    print("total: " + str(len(self.peerShares[addr])))
                 else:
                     self.peerShares[addr].clear()
                     self.peerShares[addr][idx] = share
                     self.peerRound[addr]['round'] = peer_round
                     self.peerRound[addr]['status'] = 'accept'
+                    
+                    # print result
+                    print("#############################################################")
+                    print("Receive share " + idx + ": " + share)
+                    print("MD5: " + peer_round)
+                    print("from: " + addr)
+                    print("total: " + str(len(self.peerShares[addr])))
+                    
                     return None
             
             # reconstruct peer's EphID if enough shares are received
-            if len(self.peerShares[addr]) == 3:
+            if len(self.peerShares[addr]) >= 3 and self.peerRound[addr]['status'] == 'accept':
+                print("#############################################################")
+                print("More than 3 shares are received; Attempt re-construction......")
+                
                 shares = []
                 for idx, share in self.peerShares[addr].items():
                     shares.append((int(idx), unhexlify(share)))
                 
                 peer_ephid = Shamir.combine(shares)
+                print("Re-constructed EphID: " + peer_ephid.hex())
+
+                print("Verifying EphID by MD5......")
                 if ecdh.verifyEphID(peer_ephid, peer_round):
-                    print(addr + "'s EphID verified")
-                    print("Recovered EphID: " + peer_ephid.hex())
+                    print("EphID is verified!")
+                
+                else:
+                    print("EphID is not verified!")
+                    return None
                 
                 encid = ecdh.calcEncID(self.ecdhObj, peer_ephid)
                 print("Generate EncID: " + encid.hex())

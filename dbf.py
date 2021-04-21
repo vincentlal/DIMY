@@ -32,8 +32,8 @@ class DBF():
     
     def add(self, encID):
         indexes = self._dbf.add(encID)
-        print(f'Inserting EncID into DBF at positions: {str(indexes)[1:-1]}')
-        print(f'Current DBF state after inserting new EncID: {self._dbf.getIndexes()}')
+        # print(f'Inserting EncID into DBF at positions: {str(indexes)[1:-1]}')
+        print(f'DBF state after insertion: {self._dbf.getIndexes()}')
 
     @property
     def filter(self):
@@ -52,6 +52,10 @@ class DBFManager():
         end = datetime.now() + timedelta(seconds=self._cycleRate)
         dbfObj = DBF(start, end)
         self._dbfList.append(dbfObj)
+        
+        print("#############################################################")
+        print("Create new DBF(" + start.strftime("%Y-%m-%d %H:%M:%S") + ", " + end.strftime("%Y-%m-%d %H:%M:%S") + ")")
+        
         # Start thready for cycling DBFs
         self._dbfThread = threading.Thread(target=self.initialiseDBFCycling, name='DBF-Cycler', daemon=True)
         self._dbfThread.start()
@@ -70,6 +74,10 @@ class DBFManager():
         end = start + timedelta(seconds=self._cycleRate)
         if (len(self._dbfList) == 6):
             self._dbfList.pop(0)
+        
+        print("#############################################################")
+        print("Create new DBF(" + start.strftime("%Y-%m-%d %H:%M:%S") + ", " + end.strftime("%Y-%m-%d %H:%M:%S") + ")")
+        
         self._dbfList.append(DBF(start,end))
         self._cycles += 1
         if (self._cycles == 6):
@@ -78,13 +86,20 @@ class DBFManager():
         
     # Add EncID to DBF
     def addToDBF(self, encID):
-        print("Inserting into DBF (murmur3 hashing with 3 hashes)")
-        self._dbfList[-1].add(encID) # add encID to current DBF
+        dbfObj = self._dbfList[-1]
+        start = dbfObj.startTime
+        end = dbfObj.endTime
+        
+        print("#############################################################")
+        print("Inserting " + encID.hex() + " into the DBF(" + start.strftime("%Y-%m-%d %H:%M:%S") + ", " +  end.strftime("%Y-%m-%d %H:%M:%S") + ")")
+        
+        dbfObj.add(encID) # add encID to current DBF
 
     def combineIntoQBF(self):
         return QBF(self._dbfList)
     
     def setQBF(self):
+        print("#############################################################")
         print(f'Combining DBFs into a single QBF: {datetime.now()}')
         self._qbf = self.combineIntoQBF()
         print(f'Next Query Time: {datetime.now() + timedelta(hours=1)}')
@@ -96,6 +111,7 @@ class DBFManager():
         if (self._qbf == None):
             print('here')
             self.setQBF()
+        print("#############################################################")
         print('Uploading QBF to backend server...')
         url = "http://ec2-3-26-37-172.ap-southeast-2.compute.amazonaws.com:9000/comp4337/qbf/query"
         payload = self._qbf.rawJSON()

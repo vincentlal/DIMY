@@ -3,6 +3,7 @@ import socket
 import threading
 import time
 import keyexchange
+from dbf import DBFManager
   
 def send(khandler):
     sender = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP) # UDP
@@ -34,7 +35,7 @@ def send(khandler):
         time.sleep(10)
         minuteFlag += 1
   
-def receive(khandler):
+def receive(khandler, dbfm):
     receiver = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP) # UDP
 
     # Enable port reusage so we will be able to run multiple clients and servers on single (host, port). 
@@ -52,17 +53,26 @@ def receive(khandler):
     receiver.bind(("", 12345))
     while True:
         data, addr = receiver.recvfrom(1024)
-        # drop UDP packets from itself  
-        if addr[0] != socket.gethostbyname(socket.gethostname()):
+        data_in_str = str(data, 'UTF-8')
+        addr_in_str = addr[0] + "/" + str(addr[1])
+        
+        # drop UDP packets from itself 
+        identity = data_in_str.split(",")[0] 
+        if identity != khandler.getEphIDHash():
             # TODO: Shamir Secret Sharing
-            print("received message: {} from {}".format(data, addr))
+            encid = khandler.addPeerShare(addr_in_str, data)
+
+            # TODO: Encode EncID into DBF
+            if encid is not None:
+                dbfm.addToDBF(encid)
   
 if __name__ == "__main__":
     khandler = keyexchange.KeyHandler()
+    dbfm = DBFManager()
     
     # creating thread
     t1 = threading.Thread(target=send, args=(khandler,), name='Thread-send', daemon=True)
-    t2 = threading.Thread(target=receive, args=(khandler,), name='Thread-receive', daemon=True)
+    t2 = threading.Thread(target=receive, args=(khandler, dbfm,), name='Thread-receive', daemon=True)
 
     # starting thread 1
     t1.start()
