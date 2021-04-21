@@ -30,7 +30,7 @@ class KeyHandler:
         print("#############################################################")
         print("Generate EphID: " + self.publicKey.hex())
         for idx, share in self.shares:
-            print("Generate share " + str(idx) + " of EphID: " + hexlify(share).decode())
+            print("Share " + str(idx) + " of EphID: " + hexlify(share).decode())
 
         # Key reconstruct part
         
@@ -66,7 +66,7 @@ class KeyHandler:
             print("#############################################################")
             print("Generate EphID: " + self.publicKey.hex())
             for idx, share in self.shares:
-                print("Generate share " + str(idx) + " of EphID: " + hexlify(share).decode())
+                print("Share " + str(idx) + " of EphID: " + hexlify(share).decode())
     
     # return EncID if enough shares are received; otherwise return None
     def addPeerShare(self, addr, data):
@@ -88,9 +88,9 @@ class KeyHandler:
                 # print result
                 print("#############################################################")
                 print("Receive share " + idx + ": " + share)
-                print("MD5: " + peer_round)
+                print("MD5(EphID): " + peer_round)
                 print("from: " + addr)
-                print("total: " + str(len(self.peerShares[addr])))
+                print("total shares form current EphID: " + str(len(self.peerShares[addr])))
                 return None
             else:
                 # check if receiving-share and stored-shares are from same EphID
@@ -101,9 +101,9 @@ class KeyHandler:
                     # print result
                     print("#############################################################")
                     print("Receive share " + idx + ": " + share)
-                    print("MD5: " + peer_round)
+                    print("MD5(EphID): " + peer_round)
                     print("from: " + addr)
-                    print("total: " + str(len(self.peerShares[addr])))
+                    print("total shares form current EphID: " + str(len(self.peerShares[addr])))
                 else:
                     self.peerShares[addr].clear()
                     self.peerShares[addr][idx] = share
@@ -113,9 +113,9 @@ class KeyHandler:
                     # print result
                     print("#############################################################")
                     print("Receive share " + idx + ": " + share)
-                    print("MD5: " + peer_round)
+                    print("MD5(EphID): " + peer_round)
                     print("from: " + addr)
-                    print("total: " + str(len(self.peerShares[addr])))
+                    print("total shares form current EphID: " + str(len(self.peerShares[addr])))
                     
                     return None
             
