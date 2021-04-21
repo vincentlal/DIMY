@@ -42,7 +42,7 @@ def receive(khandler, dbfm):
     # gpto https://stackoverflow.com/questions/14388706/how-do-so-reuseaddr-and-so-reuseport-differ for more information.
    
     # for Linux >= 3.9/MacOS
-    # sender.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT, 1)
+    # receiver.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT, 1)
 
     # for Windows
     receiver.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
