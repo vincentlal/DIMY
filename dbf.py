@@ -126,7 +126,7 @@ class DBFManager():
         res = requests.request("POST", url, json=payload, headers=headers)
         resJSON = res.json()
         print("#############################################################")
-        if (resJSON['result'] == "No Match"):
+        if (resJSON['result'] == "No Match."):
             print("QBF Uploaded to EC2 Server - Result: No Match - You are safe.")
         else:
             print("QBF Uploaded to EC2 Server - Result: Match - You are potentially at risk.")
