@@ -122,7 +122,7 @@ class KeyHandler:
             # reconstruct peer's EphID if enough shares are received
             if len(self.peerShares[addr]) >= 3 and self.peerRound[addr]['status'] == 'accept':
                 print("#############################################################")
-                print("More than 3 shares are received; Attempt re-construction...")
+                print("At least 3 shares are received; Attempt re-construction...")
                 
                 shares = []
                 for idx, share in self.peerShares[addr].items():

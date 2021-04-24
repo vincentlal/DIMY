@@ -65,6 +65,8 @@ def receive(khandler, dbfm):
             # TODO: Encode EncID into DBF
             if encid is not None:
                 dbfm.addToDBF(encid)
+                del encid
+                print ("Deleted reference to EncID")
   
 if __name__ == "__main__":
     khandler = keyexchange.KeyHandler()
