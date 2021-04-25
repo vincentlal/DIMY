@@ -1,17 +1,11 @@
 # Testing generation of 128-bit EphID and generation of EncID
 
-# Issue:
-# 	load_received_public_key_bytes from ecdsa requires 17byte public key as input
-# 		Solution:
-# 			1. Use hash to determine if EphID was prepended with \x02 or \x03
-# 			2. Use only one type (e.g. only EphID starting with \x02)
-# 			3. Append 'b\x02' to EphID. Sign of Y does not seem to make a difference to EncID generated (Currently used)
-
 # Setup:
 # 	git clone https://github.com/tlsfuzzer/python-ecdsa.git
 # 		into python site-packages
 # 	ensure ecdsa not pip installed
-# 	mv src ecdsa
+# 	rename 'src' to 'ecdsa'
+#   move 'ecdsa' to python site-packages
 
 from hashlib import md5
 from ecdsa import ECDH, SECP128r1

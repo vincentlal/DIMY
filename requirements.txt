@@ -1,0 +1,4 @@
+pycryptodome
+bitarray
+mmh3
+flask
